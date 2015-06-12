@@ -18,13 +18,19 @@ def sign_up():
     role_name = json_req['role']
     is_valid = validate_email(email)
     print '%s %s %s %s' % (username, email, password, role_name)
-    if not is_valid or len(password) < 6 or len(username) < 4 and (role_name == 'fun' or role_name == 'artist'):
-        return jsonify({'message': 'error'}), 404
+    print not is_valid
+    print len(password) < 6
+    print len(username) < 4
+    print role_name != 'fan'
+    print role_name != 'artist'
 
-    role = Role.query.filter_by(name=role_name).first()
-    user = User(email=email, username=username, password=password, role=role)
-    db.session.add(user)
-    return jsonify({'message': 'success'})
+    if not is_valid or len(password) < 6 or len(username) < 4 or not (role_name == 'fan' or role_name == 'artist'):
+        return jsonify({'message': 'error'}), 404
+    else:
+        role = Role.query.filter_by(name=role_name).first()
+        user = User(email=email, username=username, password=password, role=role)
+        db.session.add(user)
+        return jsonify({'message': 'success'})
 
 
 @auth.route('/signin', methods=['POST'])
