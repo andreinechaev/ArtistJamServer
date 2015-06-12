@@ -8,7 +8,6 @@ from app.authentication import auth
 from app.models import User, Role
 from app import db
 
-
 @auth.route('/signup', methods=['POST'])
 def sign_up():
     json_req = request.json
