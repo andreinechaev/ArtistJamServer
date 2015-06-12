@@ -24,7 +24,6 @@ def stage():
     if request.method == 'GET':
         events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.posted.desc()).all()
         events_dic = {'events': [], 'coming': []}
-
         for e in events:
             if e.when.date() == datetime.today().date():
                 events_dic['events'].append({
