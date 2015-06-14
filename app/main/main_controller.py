@@ -99,7 +99,7 @@ def post_news():
 @login_required
 def get_news():
     if request.method == 'GET':
-        news = News.query.order_by(News.posted.desc()).all()
+        news = News.query.order_by(News.posted.asc()).all()
         news_dic = {'news': []}
         print news
         for n in news:
