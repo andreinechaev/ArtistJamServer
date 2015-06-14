@@ -47,6 +47,8 @@ def stage():
                     'when': e.when,
                     'posted': e.posted
                 })
+            print e.name
+            print e.posted
 
         return jsonify(events_dic)
 
@@ -99,9 +101,9 @@ def post_news():
 @login_required
 def get_news():
     if request.method == 'GET':
-        news = News.query.order_by(News.posted.asc()).all()
+        news = News.query.order_by(News.posted.desc()).all()
         news_dic = {'news': []}
-        print news
+
         for n in news:
             news_dic['news'].append({
                 'author': User.query.filter_by(id=n.user_id).first().username,
@@ -110,6 +112,8 @@ def get_news():
                 'image_link': n.image_link,
                 'posted': n.posted
             })
+            print n.name
+            print n.posted
 
         return jsonify(news_dic)
 
