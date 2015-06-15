@@ -18,9 +18,9 @@ def no_user():
     return jsonify({'message': 'error'}), 400
 
 
-@main.route('/stage', methods=['GET', 'POST'])
+@main.route('/stage/all')
 @login_required
-def stage():
+def stage_all():
     if request.method == 'GET':
         events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.posted.desc()).all()
         events_dic = {'events': [], 'coming': []}
@@ -55,9 +55,9 @@ def stage():
     return jsonify({'message': 'error'}), 404
 
 
-@main.route('/event', methods=['POST'])
+@main.route('/stage/event/new', methods=['POST'])
 @login_required
-def event():
+def event_new():
     json = request.json
     user_id = User.query.filter_by(username=json['username']).first().id
     name = json['title']
@@ -79,9 +79,9 @@ def event():
         return jsonify({'message': 'error'})
 
 
-@main.route('/post_news', methods=['POST'])
+@main.route('/stage/news/new', methods=['POST'])
 @login_required
-def post_news():
+def news_new():
     json = request.json
     user_id = User.query.filter_by(username=json['username']).first().id
     name = json['title']
@@ -97,9 +97,9 @@ def post_news():
         return jsonify({'message': 'error'})
 
 
-@main.route('/news', methods=['GET', 'POST'])
+@main.route('/stage/news/all', methods=['GET', 'POST'])
 @login_required
-def get_news():
+def news_all():
     if request.method == 'GET':
         news = News.query.order_by(News.posted.desc()).all()
         news_dic = {'news': []}

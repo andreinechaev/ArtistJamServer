@@ -8,7 +8,7 @@ from app.authentication import auth
 from app.models import User, Role
 from app import db
 
-@auth.route('/signup', methods=['POST'])
+@auth.route('/auth/signup', methods=['POST'])
 def sign_up():
     json_req = request.json
     username = json_req['username']
@@ -32,7 +32,7 @@ def sign_up():
         return jsonify({'message': 'success'})
 
 
-@auth.route('/signin', methods=['POST'])
+@auth.route('/auth/signin', methods=['POST'])
 def sign_in():
     json_req = request.json
     user = User.query.filter_by(username=json_req['username']).first()
@@ -47,7 +47,7 @@ def sign_in():
     return jsonify({'message': 'error'}), 404
 
 
-@auth.route('/logout')
+@auth.route('/auth/logout')
 @login_required
 def logout():
     logout_user()
