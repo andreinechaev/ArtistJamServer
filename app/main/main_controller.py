@@ -57,7 +57,7 @@ def stage_all():
 
 @main.route('/stage/event/new', methods=['POST'])
 @login_required
-def event_new():
+def new_event():
     json = request.json
     user_id = User.query.filter_by(username=json['username']).first().id
     name = json['title']
@@ -79,9 +79,9 @@ def event_new():
         return jsonify({'message': 'error'})
 
 
-@main.route('/stage/news/new', methods=['POST'])
+@main.route('/feed/news/new', methods=['POST'])
 @login_required
-def news_new():
+def new_news():
     json = request.json
     user_id = User.query.filter_by(username=json['username']).first().id
     name = json['title']
@@ -97,7 +97,7 @@ def news_new():
         return jsonify({'message': 'error'})
 
 
-@main.route('/stage/news/all', methods=['GET', 'POST'])
+@main.route('/feed/news/all', methods=['GET', 'POST'])
 @login_required
 def news_all():
     if request.method == 'GET':
