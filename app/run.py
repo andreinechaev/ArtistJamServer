@@ -12,12 +12,17 @@ application.config['SECRET_KEY'] = '79cc1336-0d31-11e5-a5d2-10ddb1e2ba3a'
 # artist = Role(name='artist')
 
 @application.errorhandler(500)
-def error_handler():
-    return jsonify({"error": "Error occurred  on the server"}), 500
+def error_handler(error):
+    return jsonify({"error": repr(error)}), 500
 
 @application.errorhandler(404)
-def page_not_found():
-    return jsonify({"error": "Page not found"}), 404
+def page_not_found(error):
+    return jsonify({"error": repr(error)}), 404
+
+
+@application.errorhandler(300)
+def exception_handler(error):
+    return jsonify({'error': repr(error)}), 500
 
 
 if __name__ == '__main__':
