@@ -16,12 +16,6 @@ def sign_up():
     password = json_req['password']
     role_name = json_req['role']
     is_valid = validate_email(email)
-    print '%s %s %s %s' % (username, email, password, role_name)
-    print not is_valid
-    print len(password) < 6
-    print len(username) < 4
-    print role_name != 'fan'
-    print role_name != 'artist'
 
     if not is_valid or len(password) < 6 or len(username) < 4 or not (role_name == 'fan' or role_name == 'artist'):
         return jsonify({'message': 'error'}), 404
@@ -40,7 +34,6 @@ def sign_in():
     if user is not None and user.verify_password(json_req['password']):
         login_user(user)
         role = Role.query.filter_by(id=user.role_id).first()
-        print role, user.role_id
         return jsonify({'message': 'success',
                         'role': role.name})
 

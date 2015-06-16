@@ -47,8 +47,6 @@ def stage_all():
                     'when': e.when,
                     'posted': e.posted
                 })
-            print e.name
-            print e.posted
 
         return jsonify(events_dic)
 
@@ -112,8 +110,6 @@ def news_all():
                 'image_link': n.image_link,
                 'posted': n.posted
             })
-            print n.name
-            print n.posted
 
         return jsonify(news_dic)
 
