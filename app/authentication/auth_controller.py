@@ -45,11 +45,3 @@ def sign_in():
 def logout():
     logout_user()
     return jsonify({'message': 'success'})
-
-@auth.errorhandler(500)
-def error_handler():
-    return jsonify({"error": "Error occurred  on the server"}), 500
-
-@auth.errorhandler(404)
-def page_not_found():
-    return jsonify({"error": "Page not found"}), 404

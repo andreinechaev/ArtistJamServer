@@ -116,11 +116,3 @@ def news_all():
     return jsonify({'message': 'error'}), 404
 
 
-@main.errorhandler(500)
-def error_handler():
-    return jsonify({"error": "data cannot be written"}), 500
-
-@auth.errorhandler(404)
-def page_not_found():
-    return jsonify({"error": "Page not found"}), 404
-
