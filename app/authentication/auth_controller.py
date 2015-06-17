@@ -15,10 +15,12 @@ def sign_up():
     email = json_req['email']
     password = json_req['password']
     role_name = json_req['role']
-    is_valid = validate_email(email)
-
-    if not is_valid or len(password) < 6 or len(username) < 4 or not (role_name == 'fan' or role_name == 'artist'):
-        return jsonify({'message': 'error'}), 404
+    if exist_with_name(username):
+        return jsonify({'message': 'User with this name already exist'}), 400
+    if exist_with_email(email):
+        return jsonify({'message': 'User with this email already exist'}), 400
+    if check_user(username, password, email, role_name):
+        return jsonify({'message': 'Incorrect data, check all fields'}), 400
     else:
         role = Role.query.filter_by(name=role_name).first()
         user = User(email=email, username=username, password=password, role=role)
@@ -37,7 +39,7 @@ def sign_in():
         return jsonify({'message': 'success',
                         'role': role.name})
 
-    return jsonify({'message': 'error'}), 404
+    return jsonify({'message': 'Incorrect username/password'}), 400
 
 
 @auth.route('/auth/logout')
@@ -45,3 +47,23 @@ def sign_in():
 def logout():
     logout_user()
     return jsonify({'message': 'success'})
+
+
+def check_user(username, password, email, role_name):
+    is_valid = validate_email(email)
+    if not is_valid or len(password) < 6 or len(username) < 4 or not (role_name == 'fan' or role_name == 'artist'):
+        return True
+    else:
+        return False
+
+def exist_with_name(username):
+    if User.query.filter_by(username=username).first() is not None:
+        return True
+    else:
+        return False
+
+def exist_with_email(email):
+    if User.query.filter_by(email=email).first() is not None:
+        return True
+    else:
+        return False
