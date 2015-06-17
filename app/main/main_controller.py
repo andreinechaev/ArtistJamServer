@@ -95,8 +95,7 @@ def new_news():
         return jsonify({'message': 'error'})
 
 
-@main.route('/feed/news/all', methods=['GET', 'POST'])
-@login_required
+@main.route('/feed/news/all', methods=['GET'])
 def news_all():
     if request.method == 'GET':
         news = News.query.order_by(News.posted.desc()).all()
@@ -115,34 +114,33 @@ def news_all():
 
     return jsonify({'message': 'error'}), 404
 
-
-@main.route('/users/<username>')
-@login_required
-def user_profile(username):
-    user = User.query.filter_by(username=username).first()
-    if user is not None:
-        profile = Profile.query.filter_by(user_id=user.id).first()
-        user_dic = {'user_profile':[{'full_name': profile.full_name,
-                                     'avatar': profile.image_link,
-                                     'about': profile.about,
-                                     'show_full_name': profile.show_full_name
-                                     }]}
-        return jsonify(user_dic)
-
-    return jsonify({'error': 'User does not exist'})
-
-
-@main.route('/users/add_profile', methods=['POST'])
-@login_required
-def add_profile():
-    json = request.json
-    user = User.query.filter_by(username=json['username']).first()
-    if user is not None:
-        profile = Profile(user_id=user.id,
-                          full_name=json['full_name'],
-                          image_link=json['avatar'],
-                          about=json['about'],
-                          show_full_name=json['show_full_name'])
-        db.session.add(profile)
-        return jsonify({'message': 'success'})
-    return jsonify({'message': 'User does not exist'})
+# @main.route('/users/<username>')
+# @login_required
+# def user_profile(username):
+#     user = User.query.filter_by(username=username).first()
+#     if user is not None:
+#         profile = Profile.query.filter_by(user_id=user.id).first()
+#         user_dic = {'user_profile':[{'full_name': profile.full_name,
+#                                      'avatar': profile.image_link,
+#                                      'about': profile.about,
+#                                      'show_full_name': profile.show_full_name
+#                                      }]}
+#         return jsonify(user_dic)
+#
+#     return jsonify({'error': 'User does not exist'})
+#
+#
+# @main.route('/users/add_profile', methods=['POST'])
+# @login_required
+# def add_profile():
+#     json = request.json
+#     user = User.query.filter_by(username=json['username']).first()
+#     if user is not None:
+#         profile = Profile(user_id=user.id,
+#                           full_name=json['full_name'],
+#                           image_link=json['avatar'],
+#                           about=json['about'],
+#                           show_full_name=json['show_full_name'])
+#         db.session.add(profile)
+#         return jsonify({'message': 'success'})
+#     return jsonify({'message': 'User does not exist'})

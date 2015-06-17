@@ -22,8 +22,15 @@ def page_not_found(error):
 
 @application.errorhandler(300)
 def exception_handler(error):
-    return jsonify({'error': repr(error)}), 500
+    return jsonify({'error': repr(error)}), 300
 
+@application.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({'error': repr(error)}), 405
+
+@application.errorhandler(504)
+def gateway_timeout(error):
+    return jsonify({'error': repr(error)}), 504
 
 if __name__ == '__main__':
     application.run()
