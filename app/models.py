@@ -24,7 +24,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     email = db.Column(db.String(64), unique=True, index=True)
-    profile_id = db.relationship('Profile', uselist=False, backref='user')
+    profiles = db.relationship('Profile', uselist=False, backref='user')
     events = db.relationship('Event', backref='user', lazy='dynamic')
     news = db.relationship('News', backref='user', lazy='dynamic')
     since = db.Column(db.DateTime, default=datetime.utcnow())
@@ -54,7 +54,7 @@ def load_user(user_id):
 class Profile(db.Model):
     __tablename__ = 'profiles'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
     image_link = db.Column(db.String(256), unique=True)
     full_name = db.Column(db.String(256), index=True)
     show_full_name = db.Column(db.Boolean)
