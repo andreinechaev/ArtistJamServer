@@ -6,6 +6,7 @@ from app.main import main
 from app import db
 from flask.ext.login import login_required
 from datetime import datetime
+from sqlalchemy import exc
 
 
 @main.route('/')
@@ -143,6 +144,15 @@ def add_profile():
                           image_link=json['avatar'],
                           about=json['about'],
                           show_full_name=json['show_full_name'])
-        db.session.add(profile)
+        try:
+            db.session.add(profile)
+            db.session.flush()
+        except exc.IntegrityError:
+            db.session.rollback()
+            update_avatar(user, json['avatar'])
         return jsonify({'message': 'success'})
     return jsonify({'message': 'User does not exist'})
+
+def update_avatar(user, image_link):
+    user.image_link = image_link
+    db.session.flush()
