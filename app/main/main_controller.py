@@ -170,7 +170,7 @@ def map_locations():
     longitude = request.json['lon']
 
     events_dic = {'events': []}
-    events = Event.query.all()
+    events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.posted.desc()).all()
     events = filter(
         lambda x: (latitude - 2) < x.latitude < (latitude + 2) and (longitude - 2) < x.longitude < (longitude + 2),
         events)
