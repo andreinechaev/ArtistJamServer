@@ -190,4 +190,4 @@ def map_locations():
 
 def update_avatar(user, image_link):
     user.image_link = image_link
-    db.session.fluh()
+    db.session.flush()
