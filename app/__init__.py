@@ -7,6 +7,7 @@ from app.config import config
 
 db = SQLAlchemy()
 
+
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'main.no_user'

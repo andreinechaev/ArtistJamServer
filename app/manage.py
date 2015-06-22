@@ -1,7 +1,7 @@
 __author__ = 'faradey'
 
 from app import create_app, db
-from app.models import User
+from app.models import User, Profile, Event, News, Role
 from flask.ext.script import Shell, Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 # production
@@ -11,7 +11,7 @@ manager = Manager(application)
 migrate = Migrate(application, db)
 
 def make_shell_context():
-    return dict(app=application, db=db, User=User)
+    return dict(app=application, db=db, User=User, Profile=Profile, Event=Event, News=News, Role=Role)
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)

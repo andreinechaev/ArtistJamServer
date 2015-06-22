@@ -24,7 +24,7 @@ def no_user():
 def stage_all():
     if request.method == 'GET':
         events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.posted.desc()).all()
-        events_dic = {'events': [], 'coming': []}
+        events_dic = {'events': [], 'coming': [], 'new': []}
         for e in events:
             if e.when.date() == datetime.today().date():
                 events_dic['events'].append({
@@ -34,7 +34,7 @@ def stage_all():
                     'lat': e.latitude,
                     'long': e.longitude,
                     'image_link': e.image_link,
-                    'when': e.when,
+                    'when': e.when.strftime("%B %d, %Y"),
                     'posted': e.posted
                 })
             elif e.when.date() > datetime.today().date():
@@ -45,7 +45,7 @@ def stage_all():
                     'lat': e.latitude,
                     'long': e.longitude,
                     'image_link': e.image_link,
-                    'when': e.when,
+                    'when': e.when.strftime("%B %d, %Y"),
                     'posted': e.posted
                 })
 
@@ -72,8 +72,13 @@ def new_event():
                   description=description,
                   latitude=lat, longitude=lon,
                   when=time)
-        db.session.add(e)
-        return jsonify({'message': 'success'})
+        try:
+            db.session.add(e)
+            db.session.flush()
+            return jsonify({'message': 'success'})
+        except exc.IntegrityError:
+            db.session.rollback()
+            return jsonify({'message': 'Event with the same title already exist'})
     else:
         return jsonify({'message': 'error'})
 
@@ -90,8 +95,13 @@ def new_news():
         n = News(user_id=user_id, name=name,
                  image_link=image_link,
                  description=description)
-        db.session.add(n)
-        return jsonify({'message': 'success'})
+        try:
+            db.session.add(n)
+            db.session.flush()
+            return jsonify({'message': 'success'})
+        except exc.IntegrityError:
+            db.session.rollback()
+            return jsonify({'message': 'News with the same title already exist'})
     else:
         return jsonify({'message': 'error'})
 
@@ -153,6 +163,31 @@ def add_profile():
         return jsonify({'message': 'success'})
     return jsonify({'message': 'User does not exist'})
 
+
+@main.route('/map/locations', methods=['POST'])
+def map_locations():
+    latitude = request.json['lat']
+    longitude = request.json['lon']
+
+    events_dic = {'events': []}
+    events = Event.query.all()
+    events = filter(
+        lambda x: (latitude - 2) < x.latitude < (latitude + 2) and (longitude - 2) < x.longitude < (longitude + 2),
+        events)
+    for e in events:
+        events_dic['events'].append({
+            'author': User.query.filter_by(id=e.user_id).first().username,
+            'name': e.name,
+            'description': e.description,
+            'lat': e.latitude,
+            'long': e.longitude,
+            'image_link': e.image_link,
+            'when': e.when.strftime("%B %d, %Y"),
+            'posted': e.posted
+        })
+    return jsonify(events_dic)
+
+
 def update_avatar(user, image_link):
     user.image_link = image_link
-    db.session.flush()
+    db.session.fluh()
