@@ -23,7 +23,7 @@ def no_user():
 @login_required
 def stage_all():
     if request.method == 'GET':
-        events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.posted.desc()).all()
+        events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.desc()).all()
         events_dic = {'events': [], 'coming': [], 'new': []}
         for e in events:
             if e.when.date() == datetime.today().date():
