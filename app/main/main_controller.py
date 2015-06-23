@@ -1,7 +1,7 @@
 __author__ = 'faradey'
 
 from flask import jsonify, request
-from app.models import Event, User, News, Profile
+from app.models import Event, User, News, Profile, Role
 from app.main import main
 from app import db
 from flask.ext.login import login_required
@@ -28,8 +28,8 @@ def stage_all():
         for e in events:
             if e.when.date() == datetime.today().date():
                 events_dic['events'].append({
-                    'author': User.query.filter_by(id=e.user_id).first().username,
-                    'name': e.name,
+                    'name': User.query.filter_by(id=e.user_id).first().username,
+                    'title': e.name,
                     'description': e.description,
                     'lat': e.latitude,
                     'long': e.longitude,
@@ -39,8 +39,8 @@ def stage_all():
                 })
             elif e.when.date() > datetime.today().date():
                 events_dic['coming'].append({
-                    'author': User.query.filter_by(id=e.user_id).first().username,
-                    'name': e.name,
+                    'name': User.query.filter_by(id=e.user_id).first().username,
+                    'title': e.name,
                     'description': e.description,
                     'lat': e.latitude,
                     'long': e.longitude,
@@ -114,8 +114,8 @@ def news_all():
 
         for n in news:
             news_dic['news'].append({
-                'author': User.query.filter_by(id=n.user_id).first().username,
-                'name': n.name,
+                'name': User.query.filter_by(id=n.user_id).first().username,
+                'title': n.name,
                 'description': n.description,
                 'image_link': n.image_link,
                 'posted': n.posted
@@ -124,6 +124,24 @@ def news_all():
         return jsonify(news_dic)
 
     return jsonify({'message': 'error'}), 404
+
+
+@main.route('/users/all')
+@login_required
+def artist_all():
+    role = Role.query.filter_by(name='artist').first()
+    artists = User.query.filter_by(role_id=role.id).all()
+    artist_dic = {'artists': []}
+    for artist in artists:
+        print artist
+        profile = Profile.query.filter_by(user_id=artist.id).first()
+        if profile is None:
+            continue
+        artist_dic['artists'].append({
+            'name': artist.username,
+            'image_link': profile.image_link
+        })
+    return jsonify(artist_dic)
 
 
 @main.route('/users/<username>')
