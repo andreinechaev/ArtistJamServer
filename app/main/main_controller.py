@@ -90,10 +90,12 @@ def search_event():
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).all()
     events_dic = {'events': []}
     for event in events:
-        if json['search'].lower() not in event.name.lower():
+        username = User.query.filter_by(id=event.user_id).first().username
+        if json['search'].lower() not in event.name.lower() and json['search'].lower() not in username.lower():
             continue
+
         events_dic['events'].append({
-            'name': User.query.filter_by(id=event.user_id).first().username,
+            'name': username,
             'title': event.name,
             'description': event.description,
             'lat': event.latitude,
