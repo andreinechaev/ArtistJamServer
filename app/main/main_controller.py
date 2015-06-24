@@ -87,7 +87,6 @@ def new_event():
 @login_required
 def search_event():
     json = request.json
-    print json
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).all()
     events_dic = {'events': []}
     for event in events:
