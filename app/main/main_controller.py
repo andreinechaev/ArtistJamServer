@@ -90,7 +90,7 @@ def search_event():
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).all()
     events_dic = {'events': []}
     for event in events:
-        if json['search'] not in event.name:
+        if json['search'].decode('utf-8').lower() not in event.name.decode('utf-8').lower():
             continue
         events_dic['events'].append({
             'name': User.query.filter_by(id=event.user_id).first().username,
@@ -154,7 +154,7 @@ def search_news():
     news = News.query.order_by(News.posted.desc()).all()
     news_dic = {'news': []}
     for n in news:
-        if json['search'] not in n.name:
+        if json['search'].decode('utf-8').lower() not in n.name.decode('utf-8').lower():
             continue
         news_dic['news'].append({
             'name': n.name,
@@ -189,7 +189,7 @@ def search():
     artist_dic = {'artists': []}
     for artist in artists:
         # profile = Profile.query.filter_by(user_id=artist.id).first()
-        if json['search'] not in artist.username:
+        if json['search'].decode('utf-8').lower() not in artist.username.decode('utf-8').lower():
             continue
         artist_dic['artists'].append({
             'name': artist.username
