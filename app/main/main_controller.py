@@ -83,6 +83,27 @@ def new_event():
         return jsonify({'message': 'error'})
 
 
+@main.route('/event/search', methods=['POST'])
+@login_required
+def search_event():
+    json = request.json
+    events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).all()
+    events_dic = {'events': []}
+    for event in events:
+        if json['search'] not in event.name:
+            continue
+        events_dic['events'].append({
+            'name': User.query.filter_by(id=event.user_id).first().username,
+            'title': event.name,
+            'description': event.description,
+            'lat': event.latitude,
+            'long': event.longitude,
+            'image_link': event.image_link,
+            'when': event.when.strftime("%B %d, %Y"),
+            'posted': event.posted
+        })
+    return jsonify(events_dic)
+
 @main.route('/feed/news/new', methods=['POST'])
 @login_required
 def new_news():
@@ -126,6 +147,22 @@ def news_all():
     return jsonify({'message': 'error'}), 404
 
 
+@main.route('/news/search', methods=['POST'])
+@login_required
+def search_news():
+    json = request.json
+    news = News.query.order_by(News.posted.desc()).all()
+    news_dic = {'news': []}
+    for n in news:
+        if json['search'] not in n.name:
+            continue
+        news_dic['news'].append({
+            'name': n.name,
+            'image_link': n.image_link
+        })
+    return jsonify(news_dic)
+
+
 @main.route('/users/all')
 @login_required
 def artist_all():
@@ -133,13 +170,30 @@ def artist_all():
     artists = User.query.filter_by(role_id=role.id).all()
     artist_dic = {'artists': []}
     for artist in artists:
-        print artist
         profile = Profile.query.filter_by(user_id=artist.id).first()
         if profile is None:
             continue
         artist_dic['artists'].append({
             'name': artist.username,
             'image_link': profile.image_link
+        })
+    return jsonify(artist_dic)
+
+
+@main.route('/users/search', methods=['POST'])
+@login_required
+def search():
+    json = request.json
+    role = Role.query.filter_by(name='artist').first()
+    artists = User.query.filter_by(role_id=role.id).all()
+    artist_dic = {'artists': []}
+    for artist in artists:
+        # profile = Profile.query.filter_by(user_id=artist.id).first()
+        if json['search'] not in artist.username:
+            continue
+        artist_dic['artists'].append({
+            'name': artist.username
+            # 'image_link': profile.image_link
         })
     return jsonify(artist_dic)
 
@@ -165,7 +219,6 @@ def user_profile(username):
 def add_profile():
     json = request.json
     user = User.query.filter_by(username=json['username']).first()
-    print user
     if user is not None:
         profile = Profile(user_id=user.id,
                           full_name=json['full_name'],
