@@ -159,8 +159,11 @@ def search_news():
         if json['search'].lower() not in n.name.lower():
             continue
         news_dic['news'].append({
-            'name': n.name,
-            'image_link': n.image_link
+            'name': User.query.filter_by(id=n.user_id).first().username,
+            'title': n.name,
+            'description': n.description,
+            'image_link': n.image_link,
+            'posted': n.posted
         })
     return jsonify(news_dic)
 
