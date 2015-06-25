@@ -4,9 +4,10 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from app.config import config
+from flask.ext.cache import Cache
 
 db = SQLAlchemy()
-
+cache = Cache(config={'CACHE_TYPE': 'simple'})
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -17,7 +18,7 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     db.init_app(app)
-
+    cache.init_app(app)
     from app.main import main as bp_main
     app.register_blueprint(bp_main)
 

@@ -3,7 +3,7 @@ __author__ = 'faradey'
 from flask import jsonify, request
 from app.models import Event, User, News, Profile, Role
 from app.main import main
-from app import db
+from app import db, cache
 from flask.ext.login import login_required
 from datetime import datetime
 from sqlalchemy import exc, func
@@ -21,6 +21,7 @@ def no_user():
 
 @main.route('/stage/all')
 @login_required
+@cache.cached(timeout=100)
 def stage_all():
     if request.method == 'GET':
         events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).all()
@@ -85,6 +86,7 @@ def new_event():
 
 @main.route('/event/search', methods=['POST'])
 @login_required
+@cache.cached(timeout=10)
 def search_event():
     json = request.json
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).filter(
@@ -129,6 +131,7 @@ def new_news():
 
 
 @main.route('/feed/news/all', methods=['GET'])
+@cache.cached(timeout=100)
 def news_all():
     if request.method == 'GET':
         news = News.query.order_by(News.posted.desc()).all()
@@ -150,6 +153,7 @@ def news_all():
 
 @main.route('/news/search', methods=['POST'])
 @login_required
+@cache.cached(timeout=50)
 def search_news():
     json = request.json
     news = News.query.order_by(News.posted.desc()).filter(
@@ -168,6 +172,7 @@ def search_news():
 
 @main.route('/users/all')
 @login_required
+@cache.cached(timeout=100)
 def artist_all():
     role = Role.query.filter_by(name='artist').first()
     artists = User.query.filter_by(role_id=role.id).all()
@@ -185,6 +190,7 @@ def artist_all():
 
 @main.route('/users/search', methods=['POST'])
 @login_required
+@cache.cached(timeout=50)
 def search():
     json = request.json
     role = Role.query.filter_by(name='artist').first()
@@ -202,6 +208,7 @@ def search():
 
 @main.route('/users/<username>')
 @login_required
+@cache.cached(timeout=500)
 def user_profile(username):
     user = User.query.filter_by(username=username).first()
     if user is not None:
@@ -239,6 +246,8 @@ def add_profile():
 
 
 @main.route('/map/locations', methods=['POST'])
+@login_required
+@cache.cached(timeout=200)
 def map_locations():
     latitude = request.json['lat']
     longitude = request.json['lon']
