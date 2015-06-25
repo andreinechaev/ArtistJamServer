@@ -86,7 +86,7 @@ def new_event():
 
 @main.route('/event/search', methods=['POST'])
 @login_required
-@cache.cached(timeout=10)
+@cache.cached(timeout=1)
 def search_event():
     json = request.json
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).filter(
@@ -153,7 +153,7 @@ def news_all():
 
 @main.route('/news/search', methods=['POST'])
 @login_required
-@cache.cached(timeout=50)
+@cache.cached(timeout=1)
 def search_news():
     json = request.json
     news = News.query.order_by(News.posted.desc()).filter(
@@ -190,7 +190,7 @@ def artist_all():
 
 @main.route('/users/search', methods=['POST'])
 @login_required
-@cache.cached(timeout=50)
+@cache.cached(timeout=1)
 def search():
     json = request.json
     role = Role.query.filter_by(name='artist').first()
