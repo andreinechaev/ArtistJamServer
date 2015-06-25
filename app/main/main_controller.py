@@ -6,7 +6,7 @@ from app.main import main
 from app import db
 from flask.ext.login import login_required
 from datetime import datetime
-from sqlalchemy import exc
+from sqlalchemy import exc, func
 
 
 @main.route('/')
@@ -87,13 +87,11 @@ def new_event():
 @login_required
 def search_event():
     json = request.json
-    events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).all()
+    events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).filter(
+        func.lower(Event.name).contains(json['search'].lower())).all()
     events_dic = {'events': []}
     for event in events:
         username = User.query.filter_by(id=event.user_id).first().username
-        if json['search'].lower() not in event.name.lower() and json['search'].lower() not in username.lower():
-            continue
-
         events_dic['events'].append({
             'name': username,
             'title': event.name,
@@ -105,6 +103,7 @@ def search_event():
             'posted': event.posted
         })
     return jsonify(events_dic)
+
 
 @main.route('/feed/news/new', methods=['POST'])
 @login_required
@@ -153,11 +152,10 @@ def news_all():
 @login_required
 def search_news():
     json = request.json
-    news = News.query.order_by(News.posted.desc()).all()
+    news = News.query.order_by(News.posted.desc()).filter(
+        func.lower(News.name).contains(json['search'].lower())).all()
     news_dic = {'news': []}
     for n in news:
-        if json['search'].lower() not in n.name.lower():
-            continue
         news_dic['news'].append({
             'name': User.query.filter_by(id=n.user_id).first().username,
             'title': n.name,
@@ -190,12 +188,11 @@ def artist_all():
 def search():
     json = request.json
     role = Role.query.filter_by(name='artist').first()
-    artists = User.query.filter_by(role_id=role.id).all()
+    artists = User.query.filter_by(role_id=role.id).filter(
+        func.lower(User.username).contains(json['search'].lower())).all()
     artist_dic = {'artists': []}
     for artist in artists:
         # profile = Profile.query.filter_by(user_id=artist.id).first()
-        if json['search'].lower() not in artist.username.lower():
-            continue
         artist_dic['artists'].append({
             'name': artist.username
             # 'image_link': profile.image_link
@@ -209,11 +206,12 @@ def user_profile(username):
     user = User.query.filter_by(username=username).first()
     if user is not None:
         profile = Profile.query.filter_by(user_id=user.id).first()
-        user_dic = {'full_name': profile.full_name,
-                    'avatar': profile.image_link,
-                    'about': profile.about,
-                    'show_full_name': profile.show_full_name
-                    }
+        user_dic = {
+            'full_name': profile.full_name,
+            'avatar': profile.image_link,
+            'about': profile.about,
+            'show_full_name': profile.show_full_name
+        }
         return jsonify(user_dic)
 
     return jsonify({'error': 'User does not exist'})
