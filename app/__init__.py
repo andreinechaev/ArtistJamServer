@@ -5,8 +5,10 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from app.config import config
 from flask.ext.cache import Cache
+from flask.ext.bootstrap import Bootstrap
 
 db = SQLAlchemy()
+bootstrap = Bootstrap()
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 
 login_manager = LoginManager()
@@ -19,6 +21,7 @@ def create_app(config_name):
     config[config_name].init_app(app)
     db.init_app(app)
     cache.init_app(app)
+    bootstrap.init_app(app)
     from app.main import main as bp_main
     app.register_blueprint(bp_main)
 

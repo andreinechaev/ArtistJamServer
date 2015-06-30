@@ -2,7 +2,7 @@ __author__ = 'faradey'
 
 from datetime import datetime
 
-from flask import jsonify, request
+from flask import jsonify, request, render_template
 from app.models import Event, News
 from app.main import main
 from app import db, cache
@@ -11,8 +11,9 @@ from sqlalchemy import exc, func
 
 
 @main.route('/')
-def hello_world():
-    return 'Hello World!'
+def index():
+    news = News.query.all()
+    return render_template('index.html', news=news)
 
 
 @main.route('/error')
@@ -239,3 +240,4 @@ def unlike(news_id):
         return jsonify({'error': 'You do not like this'})
     current_user.unlike(news)
     return jsonify({'Message': 'Success'})
+
