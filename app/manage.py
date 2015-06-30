@@ -1,7 +1,7 @@
 __author__ = 'faradey'
 
 from app import create_app, db
-from app.models import User, Profile, Event, News, Role
+from app.models import User, Profile, Event, News, Role, Follow
 from flask.ext.script import Shell, Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 # production

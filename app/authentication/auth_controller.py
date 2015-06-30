@@ -35,9 +35,9 @@ def sign_in():
 
     if user is not None and user.verify_password(json_req['password']):
         login_user(user)
-        role = Role.query.filter_by(id=user.role_id).first()
         return jsonify({'message': 'success',
-                        'role': role.name})
+                        'role': user.role.name,
+                        'has_profile': user.has_profile()})
 
     return jsonify({'message': 'Incorrect username/password'}), 400
 

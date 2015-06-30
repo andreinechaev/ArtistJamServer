@@ -1,11 +1,12 @@
 __author__ = 'faradey'
 
+from datetime import datetime
+
 from flask import jsonify, request
-from app.models import Event, User, News, Profile, Role
+from app.models import Event, News
 from app.main import main
 from app import db, cache
-from flask.ext.login import login_required
-from datetime import datetime
+from flask.ext.login import login_required, current_user
 from sqlalchemy import exc, func
 
 
@@ -21,32 +22,42 @@ def no_user():
 
 @main.route('/stage/all')
 @login_required
-@cache.cached(timeout=100)
+@cache.cached(timeout=5)
 def stage_all():
     if request.method == 'GET':
         events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).all()
-        events_dic = {'events': [], 'coming': [], 'new': []}
+        events_dic = {'today': [], 'coming': [], 'new': []}
         for e in events:
+            try:
+                avatar = e.user.profile.image_link
+            except Exception:
+                avatar = 'None'
+            username = e.user.username
+            time_of_event = e.when.strftime("%B %d, %Y %H:%M")
             if e.when.date() == datetime.today().date():
-                events_dic['events'].append({
-                    'name': User.query.filter_by(id=e.user_id).first().username,
+                events_dic['today'].append({
+                    'id': e.id,
+                    'username': username,
                     'title': e.name,
+                    'avatar': avatar,
                     'description': e.description,
                     'lat': e.latitude,
                     'long': e.longitude,
                     'image_link': e.image_link,
-                    'when': e.when.strftime("%B %d, %Y"),
+                    'when': time_of_event,
                     'posted': e.posted
                 })
             elif e.when.date() > datetime.today().date():
                 events_dic['coming'].append({
-                    'name': User.query.filter_by(id=e.user_id).first().username,
+                    'id': e.id,
+                    'username': username,
                     'title': e.name,
                     'description': e.description,
+                    'avatar': avatar,
                     'lat': e.latitude,
                     'long': e.longitude,
                     'image_link': e.image_link,
-                    'when': e.when.strftime("%B %d, %Y"),
+                    'when': time_of_event,
                     'posted': e.posted
                 })
 
@@ -59,7 +70,7 @@ def stage_all():
 @login_required
 def new_event():
     json = request.json
-    user_id = User.query.filter_by(username=json['username']).first().id
+    user_id = current_user.id
     name = json['title']
     image_link = json['image']
     description = json['description']
@@ -93,15 +104,14 @@ def search_event():
         func.lower(Event.name).contains(json['search'].lower())).all()
     events_dic = {'events': []}
     for event in events:
-        username = User.query.filter_by(id=event.user_id).first().username
         events_dic['events'].append({
-            'name': username,
+            'username': event.user.username,
             'title': event.name,
             'description': event.description,
             'lat': event.latitude,
             'long': event.longitude,
             'image_link': event.image_link,
-            'when': event.when.strftime("%B %d, %Y"),
+            'when': event.when.strftime("%B %d, %Y %H:%M"),
             'posted': event.posted
         })
     return jsonify(events_dic)
@@ -111,12 +121,13 @@ def search_event():
 @login_required
 def new_news():
     json = request.json
-    user_id = User.query.filter_by(username=json['username']).first().id
+    user_id = current_user.id
     name = json['title']
     image_link = json['image']
     description = json['description']
     if user_id is not None and name is not None and description is not None and image_link is not None:
-        n = News(user_id=user_id, name=name,
+        n = News(user_id=user_id,
+                 name=name,
                  image_link=image_link,
                  description=description)
         try:
@@ -131,19 +142,26 @@ def new_news():
 
 
 @main.route('/feed/news/all', methods=['GET'])
-@cache.cached(timeout=100)
 def news_all():
     if request.method == 'GET':
         news = News.query.order_by(News.posted.desc()).all()
         news_dic = {'news': []}
 
         for n in news:
+            try:
+                avatar = n.user.profile.image_link
+            except Exception:
+                avatar = 'None'
             news_dic['news'].append({
-                'name': User.query.filter_by(id=n.user_id).first().username,
+                'id': n.id,
+                'liked': current_user.is_like(n),
+                'likes': n.count_likes(),
+                'avatar': avatar,
+                'username': n.user.username,
                 'title': n.name,
                 'description': n.description,
                 'image_link': n.image_link,
-                'posted': n.posted
+                'posted': n.posted.strftime("%B %d, %Y %H:%M")
             })
 
         return jsonify(news_dic)
@@ -161,7 +179,7 @@ def search_news():
     news_dic = {'news': []}
     for n in news:
         news_dic['news'].append({
-            'name': User.query.filter_by(id=n.user_id).first().username,
+            'username': n.user.username,
             'title': n.name,
             'description': n.description,
             'image_link': n.image_link,
@@ -170,107 +188,54 @@ def search_news():
     return jsonify(news_dic)
 
 
-@main.route('/users/all')
-@login_required
-@cache.cached(timeout=100)
-def artist_all():
-    role = Role.query.filter_by(name='artist').first()
-    artists = User.query.filter_by(role_id=role.id).all()
-    artist_dic = {'artists': []}
-    for artist in artists:
-        profile = Profile.query.filter_by(user_id=artist.id).first()
-        if profile is None:
-            continue
-        artist_dic['artists'].append({
-            'name': artist.username,
-            'image_link': profile.image_link
-        })
-    return jsonify(artist_dic)
-
-
-@main.route('/users/search', methods=['POST'])
-@login_required
-@cache.cached(timeout=1)
-def search():
-    json = request.json
-    role = Role.query.filter_by(name='artist').first()
-    artists = User.query.filter_by(role_id=role.id).filter(
-        func.lower(User.username).contains(json['search'].lower())).all()
-    artist_dic = {'artists': []}
-    for artist in artists:
-        # profile = Profile.query.filter_by(user_id=artist.id).first()
-        artist_dic['artists'].append({
-            'name': artist.username
-            # 'image_link': profile.image_link
-        })
-    return jsonify(artist_dic)
-
-
-@main.route('/users/<username>')
-@login_required
-@cache.cached(timeout=500)
-def user_profile(username):
-    user = User.query.filter_by(username=username).first()
-    if user is not None:
-        profile = Profile.query.filter_by(user_id=user.id).first()
-        user_dic = {
-            'full_name': profile.full_name,
-            'avatar': profile.image_link,
-            'about': profile.about,
-            'show_full_name': profile.show_full_name
-        }
-        return jsonify(user_dic)
-
-    return jsonify({'error': 'User does not exist'})
-
-
-@main.route('/users/add_profile', methods=['POST'])
-@login_required
-def add_profile():
-    json = request.json
-    user = User.query.filter_by(username=json['username']).first()
-    if user is not None:
-        profile = Profile(user_id=user.id,
-                          full_name=json['full_name'],
-                          image_link=json['avatar'],
-                          about=json['about'],
-                          show_full_name=json['show_full_name'])
-        try:
-            db.session.add(profile)
-            db.session.flush()
-        except exc.IntegrityError:
-            db.session.rollback()
-            update_avatar(user, json['avatar'])
-        return jsonify({'message': 'success'})
-    return jsonify({'message': 'User does not exist'})
-
-
 @main.route('/map/locations', methods=['POST'])
 @login_required
 @cache.cached(timeout=200)
 def map_locations():
     latitude = request.json['lat']
     longitude = request.json['lon']
-
     events_dic = {'events': []}
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.posted.desc()).all()
     events = filter(
         lambda x: (latitude - 2) < x.latitude < (latitude + 2) and (longitude - 2) < x.longitude < (longitude + 2),
         events)
     for e in events:
+        try:
+            avatar = e.user.profile.image_link
+        except Exception:
+            avatar = 'None'
         events_dic['events'].append({
-            'author': User.query.filter_by(id=e.user_id).first().username,
-            'name': e.name,
+            'author': e.user.username,
+            'title': e.name,
+            'avatar': avatar,
             'description': e.description,
             'lat': e.latitude,
             'long': e.longitude,
             'image_link': e.image_link,
-            'when': e.when.strftime("%B %d, %Y"),
-            'posted': e.posted
+            'when': e.when.strftime("%B %d, %Y %H:%M")
         })
     return jsonify(events_dic)
 
+@main.route('/news/like/<news_id>')
+@login_required
+def like(news_id):
+    news = News.query.filter_by(id=int(news_id)).first()
+    if news is None:
+        return jsonify({'error': 'Invalid news id'})
+    if current_user.is_like(news):
+        return jsonify({'error': 'You already liked this'})
+    print news
+    current_user.like(news)
+    return jsonify({'Message': 'Success'})
 
-def update_avatar(user, image_link):
-    user.image_link = image_link
-    db.session.flush()
+
+@main.route('/news/unlike/<news_id>')
+@login_required
+def unlike(news_id):
+    news = News.query.filter_by(id=int(news_id)).first()
+    if news is None:
+        return jsonify({'error': 'Invalid news id'})
+    if not current_user.is_like(news):
+        return jsonify({'error': 'You do not like this'})
+    current_user.unlike(news)
+    return jsonify({'Message': 'Success'})
