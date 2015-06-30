@@ -89,7 +89,8 @@ h6 {
 .content-section-a {
     padding: 50px 0;
     color: hsl(213,22%,84%);
-    background-color: hsl(210,30%,43%);
+    background-color: hsl(210,30%,45%);
+    border-bottom: 1px solid #e7e7e7;
 }
 
 .content-section-b {
@@ -97,7 +98,7 @@ h6 {
     color: hsl(213,22%,84%);
     border-top: 1px solid #e7e7e7;
     border-bottom: 1px solid #e7e7e7;
-    background-color: hsl(210,30%,53%);
+    background-color: hsl(210,30%,35%);
 }
 
 .section-heading {
@@ -107,8 +108,7 @@ h6 {
 .section-heading-spacer {
     float: left;
     width: 200px;
-    border-top: 3px solid hsl(210,30%,53%);
-    background-color: hsl(210,30%,53%);
+    border-top: 0px solid hsl(210,30%,43%);
 }
 
 .banner {
