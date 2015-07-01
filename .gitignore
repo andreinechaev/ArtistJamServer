@@ -6,3 +6,4 @@
 app/data.sqlite
 .idea
 venv
+.ebextensions
