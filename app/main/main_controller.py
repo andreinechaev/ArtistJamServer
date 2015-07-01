@@ -11,8 +11,9 @@ from sqlalchemy import exc, func
 
 
 @main.route('/')
+@cache.cached(timeout=200)
 def index():
-    news = News.query.order_by(News.posted.desc()).all()
+    news = News.query.order_by(News.posted.desc()).limit(10)
     return render_template('index.html', news=news)
 
 
