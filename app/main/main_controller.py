@@ -12,7 +12,7 @@ from sqlalchemy import exc, func
 
 @main.route('/')
 def index():
-    news = News.query.all()
+    news = News.query.order_by(News.posted.desc()).all()
     return render_template('index.html', news=news)
 
 

@@ -23,6 +23,7 @@ def artist_all():
         artist_dic['artists'].append({
             'username': artist.username,
             'following': current_user.is_following(artist),
+            'followers': artist.followers.count(),
             'avatar': artist.profile.image_link,
             'description': artist.profile.about
         })
@@ -61,6 +62,7 @@ def user_profile(username):
             'full_name': profile.full_name,
             'avatar': profile.image_link,
             'about': profile.about,
+            'followers': user.followers.count(),
             'show_full_name': profile.show_full_name
         }
         return jsonify(user_dic)
