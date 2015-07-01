@@ -34,11 +34,15 @@ def stage_all():
             except Exception:
                 avatar = 'None'
             username = e.user.username
+            about = e.user.profile.about
+            followers = e.user.followers.count()
             time_of_event = e.when.strftime("%B %d, %Y %H:%M")
             if e.when.date() == datetime.today().date():
                 events_dic['today'].append({
                     'id': e.id,
                     'username': username,
+                    'about': about,
+                    'followers': followers,
                     'title': e.name,
                     'avatar': avatar,
                     'description': e.description,
@@ -52,6 +56,8 @@ def stage_all():
                 events_dic['coming'].append({
                     'id': e.id,
                     'username': username,
+                    'about': about,
+                    'followers': followers,
                     'title': e.name,
                     'description': e.description,
                     'avatar': avatar,
@@ -151,14 +157,19 @@ def news_all():
         for n in news:
             try:
                 avatar = n.user.profile.image_link
+                about = n.user.profile.about
             except Exception:
                 avatar = 'None'
+                about = 'None'
             news_dic['news'].append({
                 'id': n.id,
                 'liked': current_user.is_like(n),
                 'likes': n.count_likes(),
                 'avatar': avatar,
                 'username': n.user.username,
+                'about': about,
+                'followers': n.user.followers.count(),
+                ''
                 'title': n.name,
                 'description': n.description,
                 'image_link': n.image_link,
@@ -179,12 +190,25 @@ def search_news():
         func.lower(News.name).contains(json['search'].lower())).all()
     news_dic = {'news': []}
     for n in news:
+        try:
+            avatar = n.user.profile.image_link
+            about = n.user.profile.about
+        except Exception:
+            avatar = 'None'
+            about = 'None'
         news_dic['news'].append({
+            'id': n.id,
+            'liked': current_user.is_like(n),
+            'likes': n.count_likes(),
+            'avatar': avatar,
             'username': n.user.username,
+            'about': about,
+            'followers': n.user.followers.count(),
+            ''
             'title': n.name,
             'description': n.description,
             'image_link': n.image_link,
-            'posted': n.posted
+            'posted': n.posted.strftime("%B %d, %Y %H:%M")
         })
     return jsonify(news_dic)
 
