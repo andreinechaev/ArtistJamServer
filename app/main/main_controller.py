@@ -231,7 +231,7 @@ def map_locations():
         except Exception:
             avatar = 'None'
         events_dic['events'].append({
-            'author': e.user.username,
+            'username': e.user.username,
             'title': e.name,
             'avatar': avatar,
             'description': e.description,
