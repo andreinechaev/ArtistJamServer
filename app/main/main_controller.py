@@ -232,6 +232,8 @@ def map_locations():
             avatar = 'None'
         events_dic['events'].append({
             'username': e.user.username,
+            'about': e.user.profile.about,
+            'followers': e.user.followers.count(),
             'title': e.name,
             'avatar': avatar,
             'description': e.description,
