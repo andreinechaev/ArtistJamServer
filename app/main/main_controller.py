@@ -216,12 +216,12 @@ def search_news():
 
 @main.route('/map/locations', methods=['POST'])
 @login_required
-@cache.cached(timeout=200)
+@cache.cached(timeout=50)
 def map_locations():
     latitude = request.json['lat']
     longitude = request.json['lon']
     events_dic = {'events': []}
-    events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.posted.desc()).all()
+    events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.desc()).all()
     events = filter(
         lambda x: (latitude - 2) < x.latitude < (latitude + 2) and (longitude - 2) < x.longitude < (longitude + 2),
         events)
@@ -243,6 +243,42 @@ def map_locations():
             'when': e.when.strftime("%B %d, %Y %H:%M")
         })
     return jsonify(events_dic)
+
+@main.route('/jam', methods=['POST'])
+@login_required
+def jam():
+    latitude = request.json['lat']
+    longitude = request.json['lon']
+    print request.json
+    events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.desc()).all()
+    print events
+    events = filter(
+        lambda x: (latitude - 0.01) < x.latitude < (latitude + 0.01) and (longitude - 0.01) < x.longitude < (
+            longitude + 0.01),
+        events)
+    print events
+    if len(events) > 0:
+        e = events[0]
+        try:
+            avatar = e.user.profile.image_link
+        except Exception:
+            avatar = 'None'
+        events_dic = {
+            'username': e.user.username,
+            'about': e.user.profile.about,
+            'followers': e.user.followers.count(),
+            'title': e.name,
+            'avatar': avatar,
+            'description': e.description,
+            'lat': e.latitude,
+            'long': e.longitude,
+            'image_link': e.image_link,
+            'when': e.when.strftime("%B %d, %Y %H:%M")
+        }
+        return jsonify(events_dic)
+    else:
+        return jsonify({'message': 'No events'})
+
 
 @main.route('/news/like/<news_id>')
 @login_required
@@ -267,4 +303,5 @@ def unlike(news_id):
         return jsonify({'error': 'You do not like this'})
     current_user.unlike(news)
     return jsonify({'Message': 'Success'})
+
 
