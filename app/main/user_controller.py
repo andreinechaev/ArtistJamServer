@@ -13,9 +13,9 @@ from sqlalchemy import exc, func
 @cache.cached(timeout=1)
 def artist_all():
     role = Role.query.filter_by(name='artist').first()
-    artists = User.query.filter_by(role_id=role.id).all()
     artist_dic = {'artists': []}
-    for artist in artists:
+    for artist in role.users:
+        print artist.role.name
         try:
             artist.profile.id
         except Exception:
@@ -34,14 +34,11 @@ def artist_all():
 @login_required
 @cache.cached(timeout=1)
 def search():
-    # print current_user.role.name
     json = request.json
-    # role = Role.query.filter_by(name='artist').first()
     artists = User.query.filter(User.role_id == 2).filter(
         func.lower(User.username).contains(json['search'].lower())).all()
     artist_dic = {'artists': []}
     for artist in artists:
-        print artist.has_profile()
         artist_dic['artists'].append({
             'username': artist.username,
             'following': current_user.is_following(artist),
@@ -100,7 +97,6 @@ def update_avatar(json):
 @main.route('/users/follow/<username>')
 @login_required
 def follow(username):
-    print username
     user = User.query.filter_by(username=username).first()
     if user is None:
         return jsonify({'error': 'Invalid user'})

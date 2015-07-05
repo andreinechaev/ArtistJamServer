@@ -1,9 +1,9 @@
 __author__ = 'faradey'
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import jsonify, request, render_template
-from app.models import Event, News
+from app.models import Event, News, User
 from app.main import main
 from app import db, cache
 from flask.ext.login import login_required, current_user
@@ -27,7 +27,7 @@ def no_user():
 @cache.cached(timeout=5)
 def stage_all():
     if request.method == 'GET':
-        events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).all()
+        events = Event.query.filter(Event.when >= (datetime.today() - timedelta(hours=12))).order_by(Event.when.asc()).all()
         events_dic = {'today': [], 'coming': [], 'new': []}
         for e in events:
             try:
@@ -37,7 +37,8 @@ def stage_all():
             username = e.user.username
             about = e.user.profile.about
             followers = e.user.followers.count()
-            time_of_event = e.when.strftime("%B %d, %Y %H:%M")
+            # %Y-%m-%d %H:%M
+            time_of_event = e.when.strftime("%m %d, %Y %H:%M")
             if e.when.date() == datetime.today().date():
                 events_dic['today'].append({
                     'id': e.id,
@@ -68,7 +69,21 @@ def stage_all():
                     'when': time_of_event,
                     'posted': e.posted
                 })
-
+            if e.user.since < (datetime.today() - timedelta(days=7)):
+                events_dic['new'].append({
+                    'id': e.id,
+                    'username': username,
+                    'about': about,
+                    'followers': followers,
+                    'title': e.name,
+                    'description': e.description,
+                    'avatar': avatar,
+                    'lat': e.latitude,
+                    'long': e.longitude,
+                    'image_link': e.image_link,
+                    'when': time_of_event,
+                    'posted': e.posted
+                })
         return jsonify(events_dic)
 
     return jsonify({'message': 'error'}), 404
@@ -102,6 +117,34 @@ def new_event():
     else:
         return jsonify({'message': 'error'})
 
+
+@main.route('/events/<username>')
+@login_required
+def event_for_user(username):
+    user = User.query.filter_by(username=username).first()
+    event_dic = {'events': []}
+    for e in user.events:
+        try:
+            avatar = e.user.profile.image_link
+            about = e.user.profile.about
+        except Exception:
+            avatar = 'None'
+            about = 'None'
+        event_dic['events'].append({
+            'id': e.id,
+            'username': username,
+            'about': about,
+            'followers': e.user.followers.count(),
+            'title': e.name,
+            'avatar': avatar,
+            'description': e.description,
+            'lat': e.latitude,
+            'long': e.longitude,
+            'image_link': e.image_link,
+            'when': e.when.strftime("%m %d, %Y %H:%M"),
+            'posted': e.posted
+        })
+    return jsonify(event_dic)
 
 @main.route('/event/search', methods=['POST'])
 @login_required
@@ -146,40 +189,62 @@ def new_news():
             db.session.rollback()
             return jsonify({'message': 'News with the same title already exist'})
     else:
-        return jsonify({'message': 'error'})
+        return jsonify({'message': 'error'}), 404
 
 
-@main.route('/feed/news/all', methods=['GET'])
+@main.route('/feed/news/all')
 def news_all():
-    if request.method == 'GET':
-        news = News.query.order_by(News.posted.desc()).all()
-        news_dic = {'news': []}
+    news = News.query.order_by(News.posted.desc()).all()
+    news_dic = {'news': []}
+    for n in news:
+        try:
+            avatar = n.user.profile.image_link
+            about = n.user.profile.about
+        except Exception:
+            avatar = 'None'
+            about = 'None'
+        news_dic['news'].append({
+            'id': n.id,
+            'liked': current_user.is_like(n),
+            'likes': n.count_likes(),
+            'avatar': avatar,
+            'username': n.user.username,
+            'about': about,
+            'followers': n.user.followers.count(),
+            'title': n.name,
+            'description': n.description,
+            'image_link': n.image_link,
+            'posted': n.posted.strftime("%B %d, %Y %H:%M")
+        })
 
-        for n in news:
-            try:
-                avatar = n.user.profile.image_link
-                about = n.user.profile.about
-            except Exception:
-                avatar = 'None'
-                about = 'None'
-            news_dic['news'].append({
-                'id': n.id,
-                'liked': current_user.is_like(n),
-                'likes': n.count_likes(),
-                'avatar': avatar,
-                'username': n.user.username,
-                'about': about,
-                'followers': n.user.followers.count(),
-                ''
-                'title': n.name,
-                'description': n.description,
-                'image_link': n.image_link,
-                'posted': n.posted.strftime("%B %d, %Y %H:%M")
-            })
+    return jsonify(news_dic)
 
-        return jsonify(news_dic)
-
-    return jsonify({'message': 'error'}), 404
+@main.route('/news/<username>')
+@login_required
+def new_for_user(username):
+    user = User.query.filter_by(username=username).first()
+    news_dic = {'news': []}
+    for n in user.news:
+        try:
+            avatar = n.user.profile.image_link
+            about = n.user.profile.about
+        except Exception:
+            avatar = 'None'
+            about = 'None'
+        news_dic['news'].append({
+            'id': n.id,
+            'liked': current_user.is_like(n),
+            'likes': n.count_likes(),
+            'avatar': avatar,
+            'username': n.user.username,
+            'about': about,
+            'followers': n.user.followers.count(),
+            'title': n.name,
+            'description': n.description,
+            'image_link': n.image_link,
+            'posted': n.posted.strftime("%B %d, %Y %H:%M")
+        })
+    return jsonify(news_dic)
 
 
 @main.route('/news/search', methods=['POST'])
@@ -205,7 +270,6 @@ def search_news():
             'username': n.user.username,
             'about': about,
             'followers': n.user.followers.count(),
-            ''
             'title': n.name,
             'description': n.description,
             'image_link': n.image_link,
@@ -249,14 +313,11 @@ def map_locations():
 def jam():
     latitude = request.json['lat']
     longitude = request.json['lon']
-    print request.json
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.desc()).all()
-    print events
     events = filter(
         lambda x: (latitude - 0.01) < x.latitude < (latitude + 0.01) and (longitude - 0.01) < x.longitude < (
             longitude + 0.01),
         events)
-    print events
     if len(events) > 0:
         e = events[0]
         try:
@@ -288,7 +349,6 @@ def like(news_id):
         return jsonify({'error': 'Invalid news id'})
     if current_user.is_like(news):
         return jsonify({'error': 'You already liked this'})
-    print news
     current_user.like(news)
     return jsonify({'Message': 'Success'})
 
