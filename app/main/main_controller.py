@@ -120,6 +120,7 @@ def new_event():
 
 @main.route('/events/<username>')
 @login_required
+@cache(timeout=25)
 def event_for_user(username):
     user = User.query.filter_by(username=username).first()
     event_dic = {'events': []}
@@ -148,7 +149,6 @@ def event_for_user(username):
 
 @main.route('/event/search', methods=['POST'])
 @login_required
-@cache.cached(timeout=1)
 def search_event():
     json = request.json
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).filter(
@@ -249,7 +249,6 @@ def new_for_user(username):
 
 @main.route('/news/search', methods=['POST'])
 @login_required
-@cache.cached(timeout=1)
 def search_news():
     json = request.json
     news = News.query.order_by(News.posted.desc()).filter(
