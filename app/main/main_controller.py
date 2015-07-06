@@ -23,7 +23,7 @@ def no_user():
 
 @main.route('/privacy/<privacy_page>')
 def privacy(privacy_page):
-    return render_template('privacy/' + privacy_page + '.html')
+    return render_template(privacy_page + '.html')
 
 
 @main.route('/stage/all')

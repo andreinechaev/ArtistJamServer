@@ -15,9 +15,9 @@ $(function() {
 
 function showSection(page){
 	if(isMobile()){
-		location.href= 'privacy/' + page;
+		location.href= page;
 	} else {
-		$("#iframe").attr('src', 'privacy/' + page);
+		$("#iframe").attr('src', page);
 	}
 
 }
