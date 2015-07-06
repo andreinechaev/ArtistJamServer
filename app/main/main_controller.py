@@ -120,7 +120,7 @@ def new_event():
 
 @main.route('/events/<username>')
 @login_required
-@cache(timeout=25)
+@cache.cached(timeout=25)
 def event_for_user(username):
     user = User.query.filter_by(username=username).first()
     event_dic = {'events': []}
