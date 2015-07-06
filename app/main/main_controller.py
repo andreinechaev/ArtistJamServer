@@ -14,12 +14,16 @@ from sqlalchemy import exc, func
 @cache.cached(timeout=200)
 def index():
     news = News.query.order_by(News.posted.desc()).limit(10)
-    return render_template('index.html', news=news)
+    return render_template('main.html', news=news)
 
 
 @main.route('/error')
 def no_user():
     return jsonify({'message': 'error'}), 400
+
+@main.route('/privacy/<privacy_page>')
+def privacy(privacy_page):
+    return render_template('privacy/' + privacy_page + '.html')
 
 
 @main.route('/stage/all')
