@@ -30,59 +30,44 @@ def stage_all():
         events = Event.query.filter(Event.when >= (datetime.today() - timedelta(hours=12))).order_by(Event.when.asc()).all()
         events_dic = {'today': [], 'coming': [], 'new': []}
         for e in events:
-            try:
-                avatar = e.user.profile.image_link
-            except Exception:
-                avatar = 'None'
             username = e.user.username
             about = e.user.profile.about
-            followers = e.user.followers.count()
-            # %Y-%m-%d %H:%M
             time_of_event = e.when.strftime("%m %d, %Y %H:%M")
             if e.when.date() == datetime.today().date():
                 events_dic['today'].append({
                     'id': e.id,
                     'username': username,
                     'about': about,
-                    'followers': followers,
                     'title': e.name,
-                    'avatar': avatar,
                     'description': e.description,
                     'lat': e.latitude,
                     'long': e.longitude,
                     'image_link': e.image_link,
                     'when': time_of_event,
-                    'posted': e.posted
                 })
             elif e.when.date() > datetime.today().date():
                 events_dic['coming'].append({
                     'id': e.id,
                     'username': username,
                     'about': about,
-                    'followers': followers,
                     'title': e.name,
                     'description': e.description,
-                    'avatar': avatar,
                     'lat': e.latitude,
                     'long': e.longitude,
                     'image_link': e.image_link,
                     'when': time_of_event,
-                    'posted': e.posted
                 })
             if e.user.since < (datetime.today() - timedelta(days=7)):
                 events_dic['new'].append({
                     'id': e.id,
                     'username': username,
                     'about': about,
-                    'followers': followers,
                     'title': e.name,
                     'description': e.description,
-                    'avatar': avatar,
                     'lat': e.latitude,
                     'long': e.longitude,
                     'image_link': e.image_link,
                     'when': time_of_event,
-                    'posted': e.posted
                 })
         return jsonify(events_dic)
 
@@ -116,6 +101,37 @@ def new_event():
             return jsonify({'message': 'Event with the same title already exist'})
     else:
         return jsonify({'message': 'error'})
+
+@main.route('/event/<event_id>')
+@login_required
+@cache.cached(timeout=500)
+def event_by_id(event_id):
+    e = Event.query.filter_by(id=int(event_id)).first()
+    if e is None:
+        return jsonify({'error': 'Not found'}), 404
+
+    try:
+        avatar = e.user.profile.image_link
+        about = e.user.profile.about
+    except Exception:
+        avatar = 'None'
+        about = 'None'
+
+    e_dic = {
+        'id': e.id,
+        'username': e.user.username,
+        'about': about,
+        'followers': e.user.followers.count(),
+        'title': e.name,
+        'avatar': avatar,
+        'description': e.description,
+        'lat': e.latitude,
+        'long': e.longitude,
+        'image_link': e.image_link,
+        'when': e.when.strftime("%m %d, %Y %H:%M"),
+    }
+    return jsonify(e_dic)
+
 
 
 @main.route('/events/<username>')
@@ -197,24 +213,14 @@ def news_all():
     news = News.query.order_by(News.posted.desc()).all()
     news_dic = {'news': []}
     for n in news:
-        try:
-            avatar = n.user.profile.image_link
-            about = n.user.profile.about
-        except Exception:
-            avatar = 'None'
-            about = 'None'
         news_dic['news'].append({
             'id': n.id,
             'liked': current_user.is_like(n),
             'likes': n.count_likes(),
-            'avatar': avatar,
             'username': n.user.username,
-            'about': about,
-            'followers': n.user.followers.count(),
             'title': n.name,
             'description': n.description,
             'image_link': n.image_link,
-            'posted': n.posted.strftime("%B %d, %Y %H:%M")
         })
 
     return jsonify(news_dic)
@@ -245,6 +251,36 @@ def new_for_user(username):
             'posted': n.posted.strftime("%B %d, %Y %H:%M")
         })
     return jsonify(news_dic)
+
+@main.route('/news/<news_id>')
+@login_required
+@cache.cached(timeout=500)
+def news_by_id(news_id):
+    n = News.query.filter_by(id=int(news_id)).first()
+    if n is None:
+        return 404
+
+    try:
+        avatar = n.user.profile.image_link
+        about = n.user.profile.about
+    except Exception:
+        avatar = 'None'
+        about = 'None'
+    news_dic = {
+        'id': n.id,
+        'liked': current_user.is_like(n),
+        'likes': n.count_likes(),
+        'avatar': avatar,
+        'username': n.user.username,
+        'about': about,
+        'followers': n.user.followers.count(),
+        'title': n.name,
+        'description': n.description,
+        'image_link': n.image_link,
+        'posted': n.posted.strftime("%B %d, %Y %H:%M")
+    }
+    return jsonify(news_dic)
+
 
 
 @main.route('/news/search', methods=['POST'])

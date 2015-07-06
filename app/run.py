@@ -21,6 +21,10 @@ def page_not_found(error):
 def exception_handler(error):
     return jsonify({'error': repr(error)}), 300
 
+@application.errorhandler(302)
+def handler_302(error):
+    return jsonify({'error': repr(error)}), 302
+
 @application.errorhandler(405)
 def method_not_allowed(error):
     return jsonify({'error': repr(error)}), 405

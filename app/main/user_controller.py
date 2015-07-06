@@ -15,7 +15,6 @@ def artist_all():
     role = Role.query.filter_by(name='artist').first()
     artist_dic = {'artists': []}
     for artist in role.users:
-        print artist.role.name
         try:
             artist.profile.id
         except Exception:
@@ -32,18 +31,18 @@ def artist_all():
 
 @main.route('/users/search', methods=['POST'])
 @login_required
-@cache.cached(timeout=1)
 def search():
     json = request.json
     artists = User.query.filter(User.role_id == 2).filter(
         func.lower(User.username).contains(json['search'].lower())).all()
     artist_dic = {'artists': []}
-    for artist in artists:
+    for user in artists:
         artist_dic['artists'].append({
-            'username': artist.username,
-            'following': current_user.is_following(artist),
-            'avatar': artist.profile.image_link,
-            'description': artist.profile.about
+            'username': user.username,
+            'following': current_user.is_following(user),
+            'description': user.profile.about,
+            'avatar': user.profile.image_link,
+            'followers': user.followers.count(),
         })
     return jsonify(artist_dic)
 
