@@ -46,7 +46,7 @@ def stage_coming():
     for e in events:
         username = e.user.username
         time_of_event = e.when.strftime("%m %d, %Y %H:%M")
-        events_dic['today'].append({
+        events_dic['coming'].append({
             'id': e.id,
             'username': username,
             'title': e.name,
