@@ -22,13 +22,15 @@ def create_app(config_name):
     db.init_app(app)
     cache.init_app(app)
     bootstrap.init_app(app)
+    login_manager.init_app(app)
+
     from app.main import main as bp_main
     app.register_blueprint(bp_main)
 
-    login_manager.init_app(app)
-
     from app.authentication import auth as bp_auth
-
     app.register_blueprint(bp_auth)
+
+    from app.stage import stage as bp_stage
+    app.register_blueprint(bp_stage)
 
     return app
