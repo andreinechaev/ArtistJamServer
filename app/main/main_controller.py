@@ -21,6 +21,7 @@ def index():
 def no_user():
     return jsonify({'message': 'error'}), 400
 
+
 @main.route('/privacy/<privacy_page>')
 def privacy(privacy_page):
     return render_template(privacy_page + '.html')
@@ -31,7 +32,8 @@ def privacy(privacy_page):
 @cache.cached(timeout=5)
 def stage_all():
     if request.method == 'GET':
-        events = Event.query.filter(Event.when >= (datetime.today() - timedelta(hours=12))).order_by(Event.when.asc()).all()
+        events = Event.query.filter(Event.when >= (datetime.today() - timedelta(hours=12))).order_by(
+            Event.when.asc()).all()
         events_dic = {'today': [], 'coming': [], 'new': []}
         for e in events:
             username = e.user.username
@@ -106,6 +108,7 @@ def new_event():
     else:
         return jsonify({'message': 'error'})
 
+
 @main.route('/event/<event_id>')
 @login_required
 @cache.cached(timeout=500)
@@ -137,7 +140,6 @@ def event_by_id(event_id):
     return jsonify(e_dic)
 
 
-
 @main.route('/events/<username>')
 @login_required
 @cache.cached(timeout=25)
@@ -166,6 +168,7 @@ def event_for_user(username):
             'posted': e.posted
         })
     return jsonify(event_dic)
+
 
 @main.route('/event/search', methods=['POST'])
 @login_required
@@ -229,6 +232,7 @@ def news_all():
 
     return jsonify(news_dic)
 
+
 @main.route('/news/<username>')
 @login_required
 def new_for_user(username):
@@ -255,6 +259,7 @@ def new_for_user(username):
             'posted': n.posted.strftime("%B %d, %Y %H:%M")
         })
     return jsonify(news_dic)
+
 
 @main.route('/news/<news_id>')
 @login_required
@@ -284,7 +289,6 @@ def news_by_id(news_id):
         'posted': n.posted.strftime("%B %d, %Y %H:%M")
     }
     return jsonify(news_dic)
-
 
 
 @main.route('/news/search', methods=['POST'])
@@ -347,6 +351,7 @@ def map_locations():
         })
     return jsonify(events_dic)
 
+
 @main.route('/jam', methods=['POST'])
 @login_required
 def jam():
@@ -402,5 +407,3 @@ def unlike(news_id):
         return jsonify({'error': 'You do not like this'})
     current_user.unlike(news)
     return jsonify({'Message': 'Success'})
-
-

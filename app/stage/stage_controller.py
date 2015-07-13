@@ -10,13 +10,13 @@ from sqlalchemy import exc, func
 
 
 @stage.route('/stage/today')
-@login_required
+# @login_required
 @cache.cached(timeout=5)
 def stage_today():
     if request.method == 'GET':
-        events = Event.query.filter(
-            (datetime.today() - timedelta(hours=12)) <= Event.when <= (
-                datetime.today() + timedelta(hours=12))).order_by(Event.when.asc()).all()
+        events = Event.query.filter((datetime.today() - timedelta(hours=12)) <= Event.when).filter(
+            (datetime.today() + timedelta(hours=12)) > Event.when).order_by(
+            Event.when.asc()).all()
 
         events_dic = {'today': []}
         for e in events:
@@ -74,7 +74,7 @@ def stage_new():
     if request.method == 'GET':
         events = Event.query.filter(Event.when >= datetime.today()).order_by(
             Event.when.asc()).all()
-        events_dic = {'coming': []}
+        events_dic = {'new': []}
         for e in events:
             username = e.user.username
             time_of_event = e.when.strftime("%m %d, %Y %H:%M")
@@ -92,4 +92,7 @@ def stage_new():
 
         return jsonify(events_dic)
 
-    return jsonify({'message': 'error'}), 404
+    return jsonify({'message': 'error'}),
+
+
+404
