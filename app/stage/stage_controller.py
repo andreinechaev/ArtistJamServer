@@ -10,7 +10,7 @@ from sqlalchemy import exc, func
 
 
 @stage.route('/stage/today')
-# @login_required
+@login_required
 @cache.cached(timeout=5)
 def stage_today():
     if request.method == 'GET':
@@ -44,7 +44,7 @@ def stage_today():
 @cache.cached(timeout=5)
 def stage_coming():
     if request.method == 'GET':
-        events = Event.query.filter(Event.when > (datetime.today() + timedelta(hours=12))).order_by(
+        events = Event.query.filter(Event.when > datetime.today()).order_by(
             Event.when.asc()).all()
         events_dic = {'coming': []}
         for e in events:
@@ -92,7 +92,5 @@ def stage_new():
 
         return jsonify(events_dic)
 
-    return jsonify({'message': 'error'}),
+    return jsonify({'message': 'error'}), 404
 
-
-404
