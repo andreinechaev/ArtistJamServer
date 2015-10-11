@@ -1,7 +1,4 @@
-__author__ = 'faradey'
-
 from datetime import datetime, timedelta
-
 from flask import jsonify, request, render_template
 from app.models import Event, News, User
 from app.main import main

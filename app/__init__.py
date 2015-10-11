@@ -1,5 +1,3 @@
-__author__ = 'faradey'
-
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
@@ -14,6 +12,7 @@ cache = Cache(config={'CACHE_TYPE': 'simple'})
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'main.no_user'
+
 
 def create_app(config_name):
     app = Flask(__name__)
