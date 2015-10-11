@@ -8,6 +8,7 @@ from app.authentication import auth
 from app.models import User, Role
 from app import db
 
+
 @auth.route('/auth/signup', methods=['POST'])
 def sign_up():
     json_req = request.json
@@ -56,11 +57,13 @@ def check_user(username, password, email, role_name):
     else:
         return False
 
+
 def exist_with_name(username):
     if User.query.filter_by(username=username).first() is not None:
         return True
     else:
         return False
+
 
 def exist_with_email(email):
     if User.query.filter_by(email=email).first() is not None:
