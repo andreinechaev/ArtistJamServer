@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="69536868-937f-4a9e-a80b-f236fb98d55b" name="Default" comment="">
-      <change type="MOVED" beforePath="$PROJECT_DIR$/run.py" afterPath="$PROJECT_DIR$/app/run.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="69536868-937f-4a9e-a80b-f236fb98d55b" name="Default" comment="" />
     <ignored path="AJWebServer.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />
@@ -164,9 +161,9 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1248" />
+    <option name="x" value="1247" />
     <option name="y" value="23" />
-    <option name="width" value="1312" />
+    <option name="width" value="1313" />
     <option name="height" value="1346" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -527,10 +524,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1248" y="23" width="1312" height="1346" extended-state="0" />
+    <frame x="1247" y="23" width="1313" height="1346" extended-state="0" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21496063" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2147915" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3875598" sideWeight="0.4825073" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
