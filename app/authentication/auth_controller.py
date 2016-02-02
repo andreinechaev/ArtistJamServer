@@ -6,7 +6,7 @@ from app.models import User, Role
 from app import db
 
 
-@auth.route('/auth/signup', methods=['POST'])
+@auth.route('/auth/signup')
 def sign_up():
     username = request.args.get("username")
     password = request.args.get("password")
@@ -31,7 +31,7 @@ def sign_up():
         return jsonify({'message': 'success'})
 
 
-@auth.route('/auth/signin', methods=['POST'])
+@auth.route('/auth/signin')
 def sign_in():
     username = request.args.get("username")
     password = request.args.get("password")
