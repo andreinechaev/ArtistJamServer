@@ -1,6 +1,6 @@
+import os
 __author__ = 'faradey'
 
-import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,13 +19,11 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
-
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test_data.sqlite')
 
 
 class ProductionConfig(Config):
-
     db_username = 'faraday'
     db_password = '6bb36edc-0ff4-11e5-85d9-10ddb1e2ba3a'
     db_hostname = 'ajdb.cbdzhwxehqmz.eu-west-1.rds.amazonaws.com:5432'
@@ -34,6 +32,7 @@ class ProductionConfig(Config):
                               + db_password + '@' \
                               + db_hostname + '/' \
                               + db_name
+
 
 config = {
     'development': DevelopmentConfig,

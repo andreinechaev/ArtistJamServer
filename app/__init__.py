@@ -17,6 +17,7 @@ login_manager.login_view = 'main.no_user'
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     config[config_name].init_app(app)
     db.init_app(app)
     cache.init_app(app)
