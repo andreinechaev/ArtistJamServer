@@ -1,7 +1,6 @@
 __author__ = 'faradey'
 
 from datetime import datetime
-
 from app import db
 from flask.ext.login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +10,7 @@ likes = db.Table('likes',
                  db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
                  db.Column('news_id', db.Integer, db.ForeignKey('news.id')))
 
+
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
@@ -19,6 +19,7 @@ class Role(db.Model):
 
     def __repr__(self):
         return '<Role %r' % self.name
+
 
 class Follow(db.Model):
     __tablename__ = 'follows'
