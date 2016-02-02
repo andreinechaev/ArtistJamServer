@@ -13,11 +13,6 @@ def sign_up():
     email = request.args.get("email")
     role_name = request.args.get("role")
 
-    # json_req = request.json
-    # username = json_req['username']
-    # email = json_req['email']
-    # password = json_req['password']
-    # role_name = json_req['role']
     if exist_with_name(username):
         return jsonify({'message': 'User with this name already exist'}), 400
     if exist_with_email(email):
@@ -35,8 +30,7 @@ def sign_up():
 def sign_in():
     username = request.args.get("username")
     password = request.args.get("password")
-    # json_req = request.json
-    # user = User.query.filter_by(username=json_req['username']).first()
+
     user = User.query.filter_by(username=username).first()
     if user is not None and user.verify_password(password):
         login_user(user)

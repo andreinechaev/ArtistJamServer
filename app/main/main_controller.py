@@ -60,7 +60,7 @@ def stage_all():
                     'image_link': e.image_link,
                     'when': time_of_event,
                 })
-            if e.user.since < (datetime.today() - timedelta(days=7)):
+            if e.user.since > (datetime.today() - timedelta(days=7)):
                 events_dic['new'].append({
                     'id': e.id,
                     'username': username,
@@ -167,12 +167,13 @@ def event_for_user(username):
     return jsonify(event_dic)
 
 
-@main.route('/event/search', methods=['POST'])
+@main.route('/event/search')
 @login_required
 def search_event():
-    json = request.json
-    events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.asc()).filter(
-        func.lower(Event.name).contains(json['search'].lower())).all()
+    search = request.args.get('search')
+    events = Event.query.filter(Event.when >= datetime.today())\
+        .order_by(Event.when.asc())\
+        .filter(func.lower(Event.name).contains(search.lower())).all()
     events_dic = {'events': []}
     for event in events:
         events_dic['events'].append({
@@ -288,12 +289,12 @@ def news_by_id(news_id):
     return jsonify(news_dic)
 
 
-@main.route('/news/search', methods=['POST'])
+@main.route('/news/search')
 @login_required
 def search_news():
-    json = request.json
+    search = request.args.get('search')
     news = News.query.order_by(News.posted.desc()).filter(
-        func.lower(News.name).contains(json['search'].lower())).all()
+        func.lower(News.name).contains(search.lower())).all()
     news_dic = {'news': []}
     for n in news:
         try:
@@ -349,11 +350,11 @@ def map_locations():
     return jsonify(events_dic)
 
 
-@main.route('/jam', methods=['POST'])
+@main.route('/jam')
 @login_required
 def jam():
-    latitude = request.json['lat']
-    longitude = request.json['lon']
+    latitude = request.args.get('lat')
+    longitude = request.args.get('lon')
     events = Event.query.filter(Event.when >= datetime.today()).order_by(Event.when.desc()).all()
     events = filter(
         lambda x: (latitude - 0.01) < x.latitude < (latitude + 0.01) and (longitude - 0.01) < x.longitude < (
